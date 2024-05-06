@@ -1,0 +1,27 @@
+# MacOS related files
+*.DS_Store
+*.icloud
+
+# Python files
+**__pycache__**
+**.pyc
+*.out
+*.vscode
+**.egg-info
+*.py[cod]
+*$py.class
+.ruff_cache
+*.log
+.pytest_cache
+results
+
+# Jupyter notebooks
+*.ipynb_checkpoints
+
+# Credentials
+**/.config
+
+**.code-workspace
+
+models
+data
