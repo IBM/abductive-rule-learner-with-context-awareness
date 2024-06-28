@@ -91,15 +91,12 @@ To replicate our OOD experiments, run
 ## Citation 📚
 If you use the work released here for your research, please consider citing our paper:
 ```
-@misc{
-  camposampiero2024learningabductivereasoning,
-  title={Towards Learning Abductive Reasoning using VSA Distributed Representations}, 
-  author={Giacomo Camposampiero and Michael Hersche and Aleksandar Terzić and Roger Wattenhofer and Abu Sebastian and Abbas Rahimi},
+@inproceedings{camposampiero2024towards,
+  title={Towards Learning Abductive Reasoning using VSA Distributed Representations},
+  author={Camposampiero, Giacomo and Hersche, Michael and Terzi{\'c}, Aleksandar and Wattenhofer, Roger and Sebastian, Abu and Rahimi, Abbas},
+  booktitle={18th International Conference on Neural-Symbolic Learning and Reasoning (NeSy)},
   year={2024},
-  eprint={2406.19121},
-  archivePrefix={arXiv},
-  primaryClass={cs.LG},
-  url={https://arxiv.org/abs/2406.19121}, 
+  month={sep}
 }
 ```
 
