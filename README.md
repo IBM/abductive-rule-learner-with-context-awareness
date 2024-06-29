@@ -16,7 +16,7 @@ You will need a machine with a CUDA-enabled GPU and the Nvidia SDK installed to 
 
 #### Installing Dependencies
 
-The `mamba` software is required for running the code. You can creat a new mamba environment using
+The `mamba` software is required for running the code. You can create a new mamba environment using
 
 ```bash
 mamba create --name arlc python=3.7
