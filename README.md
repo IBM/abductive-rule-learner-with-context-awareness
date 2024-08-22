@@ -2,7 +2,7 @@
 
 ### Giacomo Camposampiero, Michael Hersche, Aleksandar Terzić, Roger Wattenhofer, Abu Sebastian and Abbas Rahimi [[Paper]](http://arxiv.org/abs/2406.19121)
 
-_Accepted as Conference Paper at the 18th International Conference on Neural-Symbolic Learning and Reasoning (NeSy), 2024._
+_Accepted as Conference Paper (Spotlight) at the 18th International Conference on Neural-Symbolic Learning and Reasoning (NeSy), 2024._
 
 <div align="center">
   <img src='figs/arlc_preview.png' width="90%"/>
