@@ -82,7 +82,9 @@ class InDistributeFourOutCenterSingle(object):
             in_component.append(element[:, :, 1:5, :])
             out_component.append(element[:, :, :1, :])
         in_scene_prob, in_scene_logprob = self.in_distribute_four.prepare(in_component)
-        out_scene_prob, out_scene_logprob = self.out_center_single.prepare(out_component)
+        out_scene_prob, out_scene_logprob = self.out_center_single.prepare(
+            out_component
+        )
         return (in_scene_prob, out_scene_prob), (in_scene_logprob, out_scene_logprob)
 
 
@@ -99,7 +101,7 @@ class LeftCenterSingleRightCenterSingle(object):
             right_component.append(element[:, :, 1:, :])
         left_scene_prob, left_scene_logprob = self.left_center_single.prepare(left_component)
         right_scene_prob, right_scene_logprob = self.right_center_single.prepare(right_component)
-        return (left_scene_prob, right_scene_prob), (left_scene_logprob, right_scene_logprob)
+        return (left_scene_prob, right_scene_prob), (left_scene_logprob,right_scene_logprob,)
 
 
 class UpCenterSingleDownCenterSingle(object):

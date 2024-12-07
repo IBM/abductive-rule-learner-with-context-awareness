@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# All rules
+python main.py  --epochs 10 --dyn_range 50  --vsa_conversion --vsa_selection --shared_rules --config "center_single" --dataset "iravenx" --data_dir "/dccstor/saentis/data/I-RAVEN-X/shuffle" --batch_size 128 --num_workers 1 --num_rules 5 --num_terms 22 --mode test --program  --seed 0 --run_name "iravenx_50_program" --exp_dir "debug" --annealing 8 --partition Arithmetic_shuffle
+python main.py  --epochs 10 --dyn_range 100  --vsa_conversion --vsa_selection --shared_rules --config "center_single" --dataset "iravenx" --data_dir "/dccstor/saentis/data/I-RAVEN-X/shuffle" --batch_size 128 --num_workers 1 --num_rules 5 --num_terms 22 --mode test --program  --seed 0 --run_name "iravenx_50_program" --exp_dir "debug" --annealing 8 --partition Arithmetic_shuffle
+python main.py  --epochs 10 --dyn_range 1000  --vsa_conversion --vsa_selection --shared_rules --config "center_single" --dataset "iravenx" --data_dir "/dccstor/saentis/data/I-RAVEN-X/shuffle" --batch_size 128 --num_workers 1 --num_rules 5 --num_terms 22 --mode test --program  --seed 0 --run_name "iravenx_50_program" --exp_dir "debug" --annealing 8 --partition Arithmetic_shuffle
+
+# Arithmetic rules
+python main.py  --epochs 10 --dyn_range 50  --vsa_conversion --vsa_selection --shared_rules --config "center_single" --dataset "iravenx" --data_dir "/dccstor/saentis/data/I-RAVEN-X/shuffle" --batch_size 128 --num_workers 1 --num_rules 5 --num_terms 22 --mode test --program  --seed 0 --run_name "iravenx_50_program" --exp_dir "debug" --annealing 8 --partition Arithmetic_shuffle
+python main.py  --epochs 10 --dyn_range 100  --vsa_conversion --vsa_selection --shared_rules --config "center_single" --dataset "iravenx" --data_dir "/dccstor/saentis/data/I-RAVEN-X/shuffle" --batch_size 128 --num_workers 1 --num_rules 5 --num_terms 22 --mode test --program  --seed 0 --run_name "iravenx_50_program" --exp_dir "debug" --annealing 8 --partition Arithmetic_shuffle
+python main.py  --epochs 10 --dyn_range 1000  --vsa_conversion --vsa_selection --shared_rules --config "center_single" --dataset "iravenx" --data_dir "/dccstor/saentis/data/I-RAVEN-X/shuffle" --batch_size 128 --num_workers 1 --num_rules 5 --num_terms 22 --mode test --program  --seed 0 --run_name "iravenx_50_program" --exp_dir "debug" --annealing 8 --partition Arithmetic_shuffle

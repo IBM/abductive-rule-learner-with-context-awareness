@@ -21,6 +21,8 @@ def main():
             res[k].append(v)
     for k, v in res.items():
         print(f"{k}\t\t{np.mean(v)} ({np.std(v)})")
+        print(f"{k}\t\t{np.min(v)} {np.max(v)}")
+        print(f"{k}\t\t{v}")
 
     mean = np.mean(sum(res.values(), []))
     std = np.mean([np.std(x) for x in res.values()])
