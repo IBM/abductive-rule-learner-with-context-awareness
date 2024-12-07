@@ -85,6 +85,11 @@ To replicate our OOD experiments, run
 ./experiments/arlc_ood.sh
 ```
 
+## I-RAVEN-X dataset evaluation
+To replicate the results reported in _Towards Learning Abductive Reasoning using VSA Distributed Representations_ (Hersche et al., 2024) on the novel I-RAVEN-X dataset, 
+switch to the `iravenx` branch and run the experiments in the `experiments/iravenx` folder.
+- `arlc_learn_iravenx_50.sh` allows to train an ARLC model from scratch, and evaluate it on both the full I-RAVEN-X dataset and the subset of Arithmetic rules.
+- `arlc_program_eval.sh` allows to evaluate the programmed ARLC on both the full I-RAVEN-X dataset and the subset of Arithmetic rules.
 
 ## Citation 📚
 If you use the work released here for your research, please consider citing our paper:
