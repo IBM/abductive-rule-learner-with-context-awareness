@@ -1,11 +1,16 @@
-# Towards Learning Abductive Reasoning using VSA Distributed Representations
+# Abductive Rule Learner with Context Awareness (ARLC)
 
-### Giacomo Camposampiero, Michael Hersche, Aleksandar Terzić, Roger Wattenhofer, Abu Sebastian and Abbas Rahimi 
-Accepted as Conference Paper (Spotlight) at the 18th International Conference on Neural-Symbolic Learning and Reasoning (NeSy), 2024. [[Paper]](http://arxiv.org/abs/2406.19121)
 <div align="center">
   <img src='figs/arlc_preview.png' width="90%"/>
 </div>
 
+This repo contains the code for the Abductive Rule Learner with Context Awareness (ARLC), a probabilistic abductive reasoner for solving Raven's progressive matrices (RPM).
+The repo features the code used to run experiments in three publications:
+- Giacomo Camposampiero, Michael Hersche, Aleksandar Terzić, Roger Wattenhofer, Abu Sebastian and Abbas Rahimi. *Towards Learning Abductive Reasoning using VSA Distributed Representations*.  18th International Conference on Neural-Symbolic Learning and Reasoning (NeSy) **[Spotlight]**, 2024. [[Paper]](http://arxiv.org/abs/2406.19121)
+- Michael Hersche, Giacomo Camposampiero, Roger Wattenhofer, Abu Sebastian and Abbas Rahimi. *Towards Learning to Reason: Comparing LLMs with Neuro-Symbolic on Arithmetic Relations in Abstract Reasoning*. Neural Reasoning and Mathematical Discovery (NEURMAD) @ AAAI, 2025. [[Paper]](https://arxiv.org/pdf/2412.05586)
+- Giacomo Camposampiero<sup>‡</sup>, Michael Hersche<sup>‡</sup>, Roger Wattenhofer, Abu Sebastian and Abbas Rahimi. *Can Large Reasoning Models do Analogical Reasoning under Perceptual Uncertainty?*. arXiv, 2025. [[Paper]]()
+
+<sup>‡</sup> these authors contributed equally.
 
 ## Build the Environment 🛠️
 
@@ -87,9 +92,12 @@ To replicate our OOD experiments, run
 
 ## I-RAVEN-X dataset evaluation
 To replicate the results reported in _Towards Learning Abductive Reasoning using VSA Distributed Representations_ (Hersche et al., 2024) on the novel I-RAVEN-X dataset, 
-switch to the `iravenx` branch and run the experiments in the `experiments/iravenx` folder.
+run the experiments in the `experiments/iravenx` folder.
 - `arlc_learn_iravenx_50.sh` allows to train an ARLC model from scratch, and evaluate it on both the full I-RAVEN-X dataset and the subset of Arithmetic rules.
 - `arlc_program_eval.sh` allows to evaluate the programmed ARLC on both the full I-RAVEN-X dataset and the subset of Arithmetic rules.
+
+## I-RAVEN-X with perceptual uncertainty dataset evaluation
+To replicate the results reported in *Can Large Reasoning Models do Analogical Reasoning under Perceptual Uncertainty?* (Camposampiero, Hersche et al., 2025) on the novel I-RAVEN-X dataset with perceptual uncertainty, run the experiments in the `experiments/uncertainty` folder.
 
 ## Citation 📚
 If you use the work released here for your research, please consider citing our paper:
@@ -105,4 +113,4 @@ If you use the work released here for your research, please consider citing our 
 
 
 ## License 🔏
-Please refer to the LICENSE file for the licensing of our code. Our implementation relies on [PrAE](https://github.com/WellyZhang/PrAE) released under GPL v3.0 and [Learn-VRF](https://github.com/IBM/learn-vector-symbolic-architectures-rule-formulations) released under GPL v3.0.
+Please refer to the LICENSE file for the licensing of our code. Our implementation relies on [PrAE](https://github.com/WellyZhang/PrAE) released under GPL v3.0 and [Learn-VRF](https://github.com/IBM/learn-vector-symbolic-architectures-rule-formulations) released under GPL v3.0, as well as on [In-Context Analgoical Reasoning with Pre-Trained Language Models](https://github.com/hxiaoyang/lm-raven) distributed under the MIT license.

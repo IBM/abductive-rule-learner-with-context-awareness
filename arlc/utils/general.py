@@ -5,6 +5,21 @@
 
 import torch
 
+
+iravenx_rule_map = {
+    "Constant": 0,
+    "Progression": 1,
+    "Arithmetic": 2,
+    "Distribute_Three": 3,
+}
+iravenx_index_map = {
+    0: "Constant",
+    1: "Progression",
+    2: "Arithmetic",
+    3: "Distribute_Three",
+}
+
+
 LOG_EPSILON = 1e-39
 NORM_SCALE = 1e15
 

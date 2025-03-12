@@ -1,4 +1,3 @@
-from .iravenx import IRAVENXDataset
-from .raven import RAVENDataset
+from .iraven import GeneralIRAVENDataset
 
-__all__ = ["RAVENDataset", "IRAVENXDataset"]
+__all__ = ["GeneralIRAVENDataset"]
