@@ -17,7 +17,7 @@ from torch.utils.tensorboard import SummaryWriter
 import arlc.utils.raven.env as reasoning_env
 from arlc.utils.averagemeter import AverageMeter
 from arlc.utils.checkpath import check_paths, save_checkpoint
-from arlc.datasets.raven import RAVENDataset
+from arlc.datasets import RAVENDataset, IRAVENXDataset
 from arlc.execution import RuleLevelReasoner
 from arlc.selection import RuleSelector
 from arlc.utils.vsa import generate_nvsa_codebooks
@@ -25,7 +25,14 @@ import arlc.losses as losses
 from arlc.utils.raven.raven_one_hot import create_one_hot
 from arlc.utils.parsing import parse_args
 
-def compute_loss_and_scores(outputs, tests, candidates, targets, loss_fn, distribute):
+
+type_idx_rule_map = {0: "Constant",1: "Progression_One",2: "Progression_Mone",3: "Progression_Two",4: "Progression_Mtwo",5: "Distribute_Three_Left",6: "Distribute_Three_Right",}
+size_idx_rule_map = {0: "Constant",1: "Progression_One",2: "Progression_Mone",3: "Progression_Two",4: "Progression_Mtwo",5: "Arithmetic_Plus",6: "Arithmetic_Minus",7: "Distribute_Three_Left",8: "Distribute_Three_Right",}
+color_idx_rule_map = {0: "Constant",1: "Progression_One",2: "Progression_Mone",3: "Progression_Two",4: "Progression_Mtwo",5: "Arithmetic_Plus",6: "Arithmetic_Minus",7: "Distribute_Three_Left",8: "Distribute_Three_Right",}
+
+
+
+def compute_loss_and_scores(outputs, tests, candidates, targets, loss_fn, distribute, params=None):
     if distribute:
         position_loss = loss_fn(
             outputs.position,
@@ -90,7 +97,8 @@ def compute_loss_and_scores(outputs, tests, candidates, targets, loss_fn, distri
             dim=1,
         ),
     ).mean(dim=-1)
-    loss = (position_loss + number_loss + type_loss + color_loss + size_loss) / 5
+    l1_regularization = sum([0.001 * torch.norm(p, 1) for p in params]) if params else 0
+    loss = position_loss + number_loss + type_loss + color_loss + size_loss #+ l1_regularization
 
     if distribute:
         position_score = loss_fn.score(
@@ -112,7 +120,7 @@ def compute_loss_and_scores(outputs, tests, candidates, targets, loss_fn, distri
         outputs.size[:, -1].unsqueeze(1).repeat(1, 8, 1), candidates.size
     )
     scores = (position_score + number_score + type_score + color_score + size_score) / 5
-    return loss, scores
+    return loss, scores#, [type_score, color_score, size_score]
 
 
 def train(args, env, device):
@@ -121,7 +129,6 @@ def train(args, env, device):
     """
 
     def inference_epoch(epoch, loader, train=True):
-
         if train:
             model.train()
             if args.config == "in_out_four":
@@ -133,14 +140,11 @@ def train(args, env, device):
                 model2.eval()
             rule_selector.eval()
 
-        unc = []
-        att = []
-        truth = []
-        samples = []
-
         # Define tracking meters
         loss_avg = AverageMeter("Loss", ":.3f")
         acc_avg = AverageMeter("Accuracy", ":.3f")
+
+        model.annealing_update(epoch, args.annealing)
 
         for counter, (extracted, targets, all_action_rule) in enumerate(tqdm(loader)):
             extracted, targets, all_action_rule = (
@@ -171,7 +175,8 @@ def train(args, env, device):
                     candidates,
                     targets,
                     loss_fn,
-                    distribute="distribute" in args.config,
+                    "distribute" in args.config,
+                    [p.data for p in model.parameters() if p.requires_grad]
                 )
             else:
                 outputs1, candidates1, tests1 = model(
@@ -201,19 +206,18 @@ def train(args, env, device):
                 scores = 0.8 * scores1 + 0.2 * scores2
 
             predictions = torch.argmax(scores, dim=-1)
-            accuracy = ((predictions == targets).sum() / len(targets)) * 100
+            accuracy = ((predictions == targets).sum() / len(targets)) * 100             
             loss_avg.update(loss.item(), extracted.size(0))
+            acc_avg.update(accuracy.item(), extracted.size(0))
             acc_avg.update(accuracy.item(), extracted.size(0))
             if train:
                 optimizer.zero_grad()
                 loss.backward()
-
-            if args.clip:
-                torch.nn.utils.clip_grad_norm_(
-                    parameters=train_param, max_norm=args.clip, norm_type=2.0
-                )
-
-            optimizer.step()
+                if args.clip:
+                    torch.nn.utils.clip_grad_norm_(
+                        parameters=train_param, max_norm=args.clip, norm_type=2.0
+                    )
+                optimizer.step()
 
         if train:
             print(
@@ -229,10 +233,10 @@ def train(args, env, device):
                     epoch, loss_avg.avg, acc_avg.avg
                 )
             )
-
             writer.add_scalar("loss/validation", loss_avg.avg, epoch)
             writer.add_scalar("accuracy/validation", acc_avg.avg, epoch)
-
+        for r in model.size_rules_set.rules:
+            print(str(r.rule))
         return acc_avg.avg
 
     # Set random seed
@@ -257,6 +261,7 @@ def train(args, env, device):
         num_rules=args.num_rules,
         shared_rules=args.shared_rules,
         program=args.program,
+        num_terms=args.num_terms
     )
     model.to(args.device)
     if args.config == "in_out_four":
@@ -272,6 +277,7 @@ def train(args, env, device):
             num_rules=args.num_rules,
             shared_rules=args.shared_rules,
             program=args.program,
+            num_terms=args.num_terms
         )
         model2.to(args.device)
 
@@ -308,14 +314,18 @@ def train(args, env, device):
         best_accuracy = 0
         start_epoch = 0
 
+
     # Dataset loader
-    train_set = RAVENDataset(
+    dataclass = RAVENDataset if args.dataset == "iraven" else IRAVENXDataset
+    train_set = dataclass(
         "train",
         args.data_dir,
         constellation_filter=args.config,
         rule_filter=args.gen_rule,
         attribute_filter=args.gen_attribute,
         n_train=args.n_train,
+        maxval=args.dyn_range,
+        partition=args.partition
     )
     train_loader = DataLoader(
         train_set,
@@ -323,13 +333,15 @@ def train(args, env, device):
         shuffle=True,
         num_workers=args.num_workers,
     )
-    val_set = RAVENDataset(
+    val_set = dataclass(
         "val",
         args.data_dir,
         constellation_filter=args.config,
         rule_filter=args.gen_rule,
         attribute_filter=args.gen_attribute,
         n_train=args.n_train,
+        maxval=args.dyn_range,
+        partition=args.partition
     )
     val_loader = DataLoader(
         val_set, batch_size=args.batch_size, num_workers=args.num_workers
@@ -383,8 +395,8 @@ def test(args, env, device, writer=None, dset="RAVEN"):
 
         loss_avg = AverageMeter("Loss", ":.3f")
         acc_avg = AverageMeter("Accuracy", ":.3f")
-
-        for (extracted, targets, all_action_rule) in tqdm(test_loader):
+        
+        for extracted, targets, all_action_rule in tqdm(test_loader):
             extracted, targets, all_action_rule = (
                 extracted.to(device),
                 targets.to(device),
@@ -411,8 +423,11 @@ def test(args, env, device, writer=None, dset="RAVEN"):
                     candidates,
                     targets,
                     loss_fn,
-                    distribute="distribute" in args.config,
+                    "distribute" in args.config,
+                    [p.data for p in model.parameters() if p.requires_grad]
                 )
+
+
             else:
                 outputs1, candidates1, tests1 = model(
                     scene_prob[0], distribute=distribute
@@ -443,19 +458,22 @@ def test(args, env, device, writer=None, dset="RAVEN"):
 
             predictions = torch.argmax(scores, dim=-1)
             accuracy = ((predictions == targets).sum() / len(targets)) * 100
-
             loss_avg.update(loss.item(), extracted.size(0))
             acc_avg.update(accuracy.item(), extracted.size(0))
+            
 
         # Save final result as npz (and potentially in Tensorboard)
-        if writer is not None:
-            writer.add_scalar("accuracy/testing-{}".format(dset), acc_avg.avg, 0)
-            np.savez(args.save_dir + "result_{:}.npz".format(dset), loss=acc_avg.avg)
-        else:
-            args.save_dir = args.resume.replace("ckpt/", "save/")
-            np.savez(args.save_dir + "result_{:}.npz".format(dset), loss=acc_avg.avg)
+        if args.resume == "":
+            if writer is not None:
+                writer.add_scalar("accuracy/testing-{}".format(dset), acc_avg.avg, 0)
+                np.savez(args.save_dir + "result_{:}.npz".format(dset), loss=acc_avg.avg)
+            else:
+                args.save_dir = args.resume.replace("ckpt/", "save/")
+                np.savez(args.save_dir + "result_{:}.npz".format(dset), loss=acc_avg.avg)
 
         print("Test Avg Accuracy: {:.4f}".format(acc_avg.avg))
+        for r in model.size_rules_set.rules:
+            print(str(r.rule))
         return acc_avg.avg
 
     # Load all checkpoint
@@ -475,12 +493,6 @@ def test(args, env, device, writer=None, dset="RAVEN"):
     test_acc = dict()
     configs = [
         "center_single",
-        "distribute_four",
-        "distribute_nine",
-        "left_right",
-        "up_down",
-        "in_out_single",
-        "in_out_four",
     ]
     for config in configs:
         args.config = config
@@ -498,6 +510,7 @@ def test(args, env, device, writer=None, dset="RAVEN"):
             num_rules=args.num_rules,
             shared_rules=args.shared_rules,
             program=args.program,
+            num_terms=args.num_terms
         )
         model.to(device)
         if not args.program:
@@ -515,6 +528,7 @@ def test(args, env, device, writer=None, dset="RAVEN"):
                 num_rules=args.num_rules,
                 shared_rules=args.shared_rules,
                 program=args.program,
+                num_terms=args.num_terms
             )
             model2.to(device)
             if not args.program:
@@ -528,29 +542,32 @@ def test(args, env, device, writer=None, dset="RAVEN"):
         )
 
         # Dataset loader
-        test_set = RAVENDataset(
+        dataclass = RAVENDataset if args.dataset == "iraven" else IRAVENXDataset
+        test_set = dataclass(
             "test",
             args.data_dir,
             constellation_filter=config,
             rule_filter=args.gen_rule,
             attribute_filter=args.gen_attribute,
+            maxval=args.dyn_range,
+            partition=args.partition
         )
         test_loader = DataLoader(
             test_set, batch_size=args.batch_size, num_workers=args.num_workers
         )
-
+        for r in model.size_rules_set.rules:
+            print(str(r.rule))
         print("Evaluating on {}".format(config))
         with torch.no_grad():
             acc = test_epoch()
         test_acc[config] = acc
-
+    
     with open(os.path.join(args.resume, f"eval.json"), "w") as fp:
         json.dump(test_acc, fp)
     return writer
 
 
 def main():
-
     args = parse_args()
 
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

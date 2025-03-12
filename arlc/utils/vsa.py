@@ -4,10 +4,10 @@
 # *----------------------------------------------------------------------------*
 
 from collections import namedtuple
-from nvsa.reasoning.vsa_block_utils import pmf2vec, block_discrete_codebook
-from arlc.utils.const import DIM_POSITION_2x2, DIM_POSITION_3x3,DIM_NUMBER_2x2,DIM_NUMBER_3x3,DIM_TYPE,DIM_SIZE,DIM_COLOR
+from nvsa.reasoning.vsa_block_utils import (pmf2vec,binding_circular,block_discrete_codebook,)
+from arlc.utils.const import DIM_POSITION_2x2,DIM_POSITION_3x3,DIM_NUMBER_2x2,DIM_NUMBER_3x3,DIM_TYPE,DIM_SIZE,DIM_COLOR
 import torch.nn as nn
-from nvsa.reasoning.vsa_block_utils import block_discrete_codebook, block_continuous_codebook
+from nvsa.reasoning.vsa_block_utils import (block_discrete_codebook,block_continuous_codebook,)
 
 Scene = namedtuple("Scene", ["position", "number", "type", "size", "color"])
 
@@ -17,13 +17,13 @@ def generate_nvsa_codebooks(args, rng):
     Generate the codebooks for NVSA frontend and backend.
     The codebook can also be loaded if it is stored under args.resume/
     """
-    backend_cb_cont, _ = block_continuous_codebook( device=args.device, scene_dim=511, d=args.nvsa_backend_d, k=args.nvsa_backend_k, rng=rng, fully_orthogonal=False,  )
-    backend_cb_discrete, _ = block_discrete_codebook( device=args.device, d=args.nvsa_backend_d, k=args.nvsa_backend_k, rng=rng  )
+    backend_cb_cont, _ = block_continuous_codebook(device=args.device,scene_dim=1024,d=args.nvsa_backend_d,k=args.nvsa_backend_k,rng=rng,fully_orthogonal=False,)
+    backend_cb_discrete, _ = block_discrete_codebook(device=args.device, d=args.nvsa_backend_d, k=args.nvsa_backend_k, rng=rng)
     return backend_cb_cont, backend_cb_discrete
 
 
 class VSAConverter(nn.Module):
-    def __init__( self, device, constellation, dictionary, dictionary_type="Discrete", context_dim=8, attributes_superposition=False,  ):
+    def __init__(self,device,constellation,dictionary,dictionary_type="Discrete",context_dim=8,attributes_superposition=False,):
         super(VSAConverter, self).__init__()
         self.device = device
         self.constellation = constellation
@@ -48,12 +48,14 @@ class VSAConverter(nn.Module):
                 DIM_NUMBER = DIM_NUMBER_3x3
             self.position_dictionary = self.dictionary[:DIM_POSITION]
             self.number_dictionary = self.dictionary[:DIM_NUMBER]
-        if self.type == "Discrete":
-            self.type_dictionary = self.dictionary[: DIM_TYPE + 1]
-            self.size_dictionary = self.dictionary[: DIM_SIZE + 1]
-        else:
-            self.type_dictionary = self.dictionary[1 : DIM_TYPE + 2]
-            self.size_dictionary = self.dictionary[1 : DIM_SIZE + 2]
+        # if self.type == "Discrete":
+        #     self.type_dictionary = self.dictionary[: DIM_TYPE + 1]
+        #     self.size_dictionary = self.dictionary[: DIM_SIZE + 1]
+        # else:
+        #     self.type_dictionary = self.dictionary[1 : DIM_TYPE + 2]
+        #     self.size_dictionary = self.dictionary[1 : DIM_SIZE + 2]
+        self.type_dictionary = self.dictionary[: DIM_TYPE + 1]
+        self.size_dictionary = self.dictionary[: DIM_SIZE + 1]
         self.color_dictionary = self.dictionary[: DIM_COLOR + 1]
 
     def compute_values(self, scene_prob):
