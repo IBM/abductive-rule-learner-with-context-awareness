@@ -16,7 +16,7 @@ def eval_parse_args():
 
 def parse_args():
     arg_parser = argparse.ArgumentParser(
-        description="NVSA lernable backend training and evaluation on RAVEN"
+        description="NVSA learnable backend training and evaluation on RAVEN"
     )
     arg_parser.add_argument("--n", type=int)
     arg_parser.add_argument("--run_name", type=str)
@@ -28,7 +28,7 @@ def parse_args():
     arg_parser.add_argument("--rule_type", type=str, default="arlc")
     arg_parser.add_argument("--num_terms", type=int, default=12)
     arg_parser.add_argument(
-        "--resume", type=str, default="", help="Resume from a initialized model"
+        "--resume", type=str, default="", help="Resume from an initialized model"
     )
     arg_parser.add_argument("--seed", type=int, default=1234, help="Random number seed")
     arg_parser.add_argument("--run", type=int, default=0, help="Run id")
@@ -102,7 +102,7 @@ def parse_args():
         "--context_superposition",
         action="store_true",
         default=False,
-        help="Use or not the VSA selector",
+        help="Use or not the context superposition",
     )
     arg_parser.add_argument(
         "--program",
