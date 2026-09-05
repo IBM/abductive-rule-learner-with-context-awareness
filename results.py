@@ -26,7 +26,7 @@ def main():
 
     mean = np.mean(sum(res.values(), []))
     std = np.mean([np.std(x) for x in res.values()])
-    print("\nLaTex table entry:")
+    print("\nLaTeX table entry:")
     print(
         " & ".join([f"${np.mean(v):.1f}^{{\pm{np.std(v):.1f}}}$" for v in res.values()])
         + f" & ${mean:.1f}^{{\pm{std:.1f})}}$"
